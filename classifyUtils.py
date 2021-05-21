@@ -1,19 +1,21 @@
 import numpy as np
 import re
-import  json
+import json
+
 
 class data_process:
-    def __init__(self,train_data_path,word_embedings_path,vocb_path,num_classes,max_document_length,dev_sample_percentage=0.2):
-        self.train_data_path =train_data_path
+    def __init__(self, train_data_path, word_embedings_path, vocb_path, num_classes, max_document_length,
+                 dev_sample_percentage=0.2):
+        self.train_data_path = train_data_path
         self.word_embedding_path = word_embedings_path
-        self.vocb_path  = vocb_path
+        self.vocb_path = vocb_path
         self.num_classes = num_classes
         self.max_document_length = max_document_length
 
-        self.word_embeddings=None
-        self.id2word={}
-        self.word2id={}
-        self.embedding_length =0
+        self.word_embeddings = None
+        self.id2word = {}
+        self.word2id = {}
+        self.embedding_length = 0
         self.dev_sample_percentage = dev_sample_percentage
 
     def load_wordebedding(self):
@@ -32,20 +34,20 @@ class data_process:
         """
         # Load data from files
         train_datas = []
-        with open(filepath, 'r', encoding='utf-8',errors='ignore') as f:
+        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
             train_datas = f.readlines()
         one_hot_labels = []
         x_datas = []
         for line in train_datas:
-            parts = line.encode('utf-8').decode('utf-8-sig').strip().split(' ',1)
-            if len(parts)<2 or (len(parts[1].strip()) == 0):
+            parts = line.encode('utf-8').decode('utf-8-sig').strip().split(' ', 1)
+            if len(parts) < 2 or (len(parts[1].strip()) == 0):
                 continue
             x_datas.append(parts[1])
-            one_hot_label = [0]*self.num_classes
+            one_hot_label = [0] * self.num_classes
             label = int(parts[0])
             one_hot_label[label] = 1
             one_hot_labels.append(one_hot_label)
-        print (' data size = ' ,len(train_datas))
+        print(' data size = ', len(train_datas))
         return [x_datas, np.array(one_hot_labels)]
 
     def load_data(self):
@@ -75,7 +77,7 @@ class data_process:
         """
         data = np.array(data)
         data_size = len(data)
-        num_batches_per_epoch = int((len(data)-1)/batch_size) + 1
+        num_batches_per_epoch = int((len(data) - 1) / batch_size) + 1
         for epoch in range(num_epochs):
             # Shuffle the data at each epoch
             if shuffle:
@@ -87,10 +89,10 @@ class data_process:
                 start_index = batch_num * batch_size
                 end_index = min((batch_num + 1) * batch_size, data_size)
 
-                #print('epoch = %d,batch_num = %d,start = %d,end_idx = %d' % (epoch,batch_num,start_index,end_index))
+                # print('epoch = %d,batch_num = %d,start = %d,end_idx = %d' % (epoch,batch_num,start_index,end_index))
                 yield shuffled_data[start_index:end_index]
 
-    def get_data_idx(self,text):
+    def get_data_idx(self, text):
         """
         Gets index of input data to generate word vector.
         """
@@ -98,47 +100,49 @@ class data_process:
         total_lines = len(text)
         for index in range(total_lines):
             data_line = text[index].split(" ")[:-1]
-            for pos in range(min(len(data_line),self.max_document_length)):
-                text_array[index,pos] = int(self.word2id.get(data_line[pos],0))
+            for pos in range(min(len(data_line), self.max_document_length)):
+                text_array[index, pos] = int(self.word2id.get(data_line[pos], 0))
         return text_array
-    
-    def handle_input(self,text):
+
+    def handle_input(self, text):
         text_array = np.zeros([1, self.max_document_length], dtype=np.int32)
-        data_line= text.strip().split(" ")
-        for pos in range(min(len(data_line),self.max_document_length)):
+        data_line = text.strip().split(" ")
+        for pos in range(min(len(data_line), self.max_document_length)):
             text_array[0, pos] = int(self.word2id.get(data_line[pos], 0))
         return text_array
 
-    def evalution(self,confusion_matrix):
+    def evalution(self, confusion_matrix):
         """
         Gets evalution:precission,recall and f1_score
         """
         # tensorflow confusion_matrix api:https://haosdent.gitbooks.io/tensorflow-document/content/api_docs/python/contrib.metrics.html#confusion_matrix.
         # 所计算出来的混淆矩阵，列是真实值（也就是期望值），行是预测值
-        accu = [0]*self.num_classes
-        column = [0]*self.num_classes
-        line = [0]*self.num_classes
+        accu = [0] * self.num_classes
+        column = [0] * self.num_classes
+        line = [0] * self.num_classes
         recall = 0
         precision = 0
-        for i in range(0,self.num_classes):
+        for i in range(0, self.num_classes):
             accu[i] = confusion_matrix[i][i]
-        for i in range(0,self.num_classes):
-            for j in range(0,self.num_classes):
-                column[i]+=confusion_matrix[j][i]
-        for i in range(0,self.num_classes):
-            for j in range(0,self.num_classes):
-                line[i]+=confusion_matrix[i][j]
-        for i in range(0,self.num_classes):
+        for i in range(0, self.num_classes):
+            for j in range(0, self.num_classes):
+                column[i] += confusion_matrix[j][i]
+        for i in range(0, self.num_classes):
+            for j in range(0, self.num_classes):
+                line[i] += confusion_matrix[i][j]
+        for i in range(0, self.num_classes):
             if column[i] != 0:
-                recall+=float(accu[i])/column[i]
+                recall += float(accu[i]) / column[i]
         recall = recall / self.num_classes
-        for i in range(0,self.num_classes):
+        for i in range(0, self.num_classes):
             if line[i] != 0:
-                precision+=float(accu[i])/line[i]
+                precision += float(accu[i]) / line[i]
         precision = precision / self.num_classes
         f1_score = (2 * (precision * recall)) / (precision + recall)
-        return precision,recall,f1_score
+        return precision, recall, f1_score
+
 
 if __name__ == "__main__":
-    x_text, y = load_data_and_labels('')
-    print (len(x_text))
+    pass
+    # x_text, y = load_data_and_labels('')
+    # print(len(x_text))

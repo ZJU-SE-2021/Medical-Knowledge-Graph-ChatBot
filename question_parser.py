@@ -1,7 +1,7 @@
 # coding: utf-8
 
 
-class QuestionPaser:
+class QuestionParser:
 
     '''构建实体节点'''
     def build_entitydict(self, args):
@@ -151,13 +151,14 @@ class QuestionPaser:
 
 
 if __name__ == '__main__':
-    from question_classifier import *
-
-    handler = QuestionPaser()
-    QChandler = QuestionClassifier()
-    while 1:
-        question = input(' input an question:')
-        data = QChandler.classify(question)
-        print(data)
-        sqls = handler.parser_main(data)
-        print(sqls)
+    pass
+    # from classifyApp import *
+    #
+    # handler = QuestionParser()
+    # QChandler = classifyApplication()
+    # while 1:
+    #     question = input(' input an question:')
+    #     data = QChandler.questionClassify(question)
+    #     print(data)
+    #     sqls = handler.parser_main(data)
+    #     print(sqls)
