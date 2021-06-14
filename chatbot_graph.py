@@ -17,7 +17,7 @@ class ChatBotGraph:
         self.searcher = AnswerSearcher()
 
     def chat_main(self, sent):
-        answer = '您的问题我还不能理解，请换个问法'
+        answer = '您的问题我还不能理解，请换个问法\n您可以试试以下问题：\n“发烧是什么病”\n“感冒有什么症状”\n“感冒多久才能好” '
         res_classify = self.classifier.analysis(sent)
         print(res_classify)
         if not res_classify:

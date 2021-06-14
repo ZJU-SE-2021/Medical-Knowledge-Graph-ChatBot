@@ -1,10 +1,12 @@
 # coding: utf-8
 
 from py2neo import Graph
+import os
+
 
 class AnswerSearcher:
     def __init__(self):
-        self.g = Graph("http://127.0.0.1:7474")
+        self.g = Graph(os.environ['NEO4J'])  # "http://127.0.0.1:7474"
         self.num_limit = 20
 
     '''执行cypher查询，并返回相应结果'''
