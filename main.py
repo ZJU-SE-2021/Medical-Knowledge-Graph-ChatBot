@@ -8,5 +8,8 @@ app = FastAPI()
 
 @app.get("/api/chatterbot")
 async def read_item(question: str = ''):
-    answer = handler.chat_main(question)
+    if question == '' or question.isspace():
+        answer = '...'
+    else:
+        answer = handler.chat_main(question)
     return {'answer': answer}
